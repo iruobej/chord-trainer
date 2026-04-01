@@ -1,0 +1,27 @@
+body {
+  font-family: "League Spartan", sans-serif;
+  margin: 0;
+  text-align: center;
+}
+
+html {
+  margin: 0;
+}
+
+nav ul{
+  display: flex;
+  list-style-type: none;
+  width: 100%;
+  background-color: rgb(19, 71, 154);
+  margin-top: 0;
+  color: white;
+}
+
+nav {
+  margin-top: 0;
+}
+
+.chordName {
+  font-size: xxx-large;
+  font-weight: 600;
+}
