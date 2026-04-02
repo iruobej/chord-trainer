@@ -6,7 +6,24 @@ function App() {
   //all 12 notes of scale
   const notes = ["C", "C#", "D", "E♭", "E", "F", "F#", "G", "A♭", "A", "B♭", "B"];
 
-  const chordTypes = {
+  type ChordType = 
+    | "major"
+    | "minor"
+    | "dim"
+    | "aug"
+    | "maj7"
+    | "min7"
+    | "aug7"
+    | "7"
+    | "dim7"
+    | "halfdim7";
+
+  type Chord = {
+    name: string;
+    notes: string[];
+  }
+
+  const chordTypes: Record<ChordType, number[]> = {
     major: [0, 4, 7],
     minor: [0, 3, 7], 
     dim: [0, 3, 6],
@@ -20,12 +37,12 @@ function App() {
   };
 
   //Build a chord from a root note (from notes array) and type (from chordTypes)
-  function getChord(root: any, type: any ) {
+  function getChord(root: string, type: ChordType) : string[] {
     // Find the index of the root note
     const rootIndex = notes.indexOf(root);
 
     // Create the chord notes using the intervals
-    return chordTypes[type].map(interval => {
+    return chordTypes[type].map((interval:number) => {
       // Add interval and wrap around if needed
       // Wrap around to keep midi notes above 12 in the same octave
       const index = (rootIndex + interval) % 12;
@@ -35,17 +52,17 @@ function App() {
     });
   }
   // Generate a random chord (this is what will be displayed)
-  function getRandomChord() {
+  function getRandomChord(): Chord {
     // Pick a random root note
     const root = notes[Math.floor(Math.random() * notes.length)];
 
     // Randomly pick a chord type
-    function getRandomChordType() {
-      const types = Object.keys(chordTypes);
+    function getRandomChordType(): ChordType{
+      const types = Object.keys(chordTypes) as ChordType[];
       return types[Math.floor(Math.random() * types.length)]; //e.g. types[Math.floor(0.34 * 10)] = types[3] = aug
     }
 
-    const type = getRandomChordType();
+    const type: ChordType = getRandomChordType();
     return {
       name: `${root} ${type}`,     // e.g. "E minor"
       notes: getChord(root, type) // e.g. ["E", "G", "B"]
@@ -53,7 +70,7 @@ function App() {
   }
 
   // Store the current chord
-  const [chord, setChord] = useState(null);
+  const [chord, setChord] = useState<Chord | null>(null);
 
    //Controlling when the program should stop generating a new chord;
   const [running, setRunning] = useState(false);
