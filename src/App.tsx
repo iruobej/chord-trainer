@@ -3,8 +3,56 @@ import './App.css'
 import Navbar from './components/Navbar.tsx';
 
 function App() {
+  const [activeNotes, setActiveNotes] = useState<number[]>([]);
   //all 12 notes of scale
   const notes = ["C", "C#", "D", "E♭", "E", "F", "F#", "G", "A♭", "A", "B♭", "B"];
+  useEffect(() => {
+      //Requesting access to any input that the browser detects
+    if (navigator.requestMIDIAccess) {
+        navigator.requestMIDIAccess()
+            .then(success, failure);
+    }
+
+    // 'midi' displays a MIDIAccess object, the key to recieving midi data
+    // The object itself provides an interface to any MIDI devices attached
+    function success (midi: MIDIAccess) {
+      var inputs = midi.inputs.values();
+      // inputs is an Iterator 
+      for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
+          // each time there is a midi message call the onMIDIMessage function 
+          input.value.onmidimessage = onMIDIMessage;
+      }
+    }
+
+    function failure () {
+        console.error('No access to your midi devices.')
+    }
+    
+    function onMIDIMessage(message: MIDIMessageEvent) {
+      const [status, note, velocity] = message.data;
+
+      if (status >=240) return; //stops console from logging messages like 254 (sent regularly by keyboard to let browser know its still connected)
+
+      //Converting note value to lettered name
+      const currentNoteName = notes[note % 12];
+
+      // Example: Detect note on (status 144) and note off (status 128)
+      // Note ON
+      if (status === 144 && velocity > 0) {
+          setActiveNotes(prev => {
+              if (prev.includes(note)) return prev; // avoid duplicates
+              return [...prev, note];
+          });
+        console.log(`Note ON: ${currentNoteName} (velocity: ${velocity})`);
+      }
+
+      // Note OFF
+      if (status === 128 || (status === 144 && velocity === 0)) {
+          setActiveNotes(prev => prev.filter(n => n !== note));
+          console.log(`Note OFF: ${currentNoteName}`);
+      }
+    }
+  }, []);
 
   type ChordType = 
     | "major"
@@ -80,23 +128,57 @@ function App() {
   const [selectedNumber, setSelectedNumber] = useState("5");
   const [countdownNumber, setCountdownNumber] = useState(Number(selectedNumber)); // to show time left
 
+  //Handling countdown
   useEffect(() => {
     if (!running) return;
 
+    // Reset countdown for new chord
     setCountdownNumber(Number(selectedNumber));
 
-    const timer = setInterval(() => {
+    const interval = setInterval(() => {
       setCountdownNumber(prev => {
         if (prev <= 1) {
-          setChord(getRandomChord());
+          generateChord();
           return Number(selectedNumber);
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(timer); //cleanup function
-  }, [running, selectedNumber]);
+    // Cleanup
+    return () => clearInterval(interval);
+  }, [running, selectedNumber, chord]); // include chord so new chord restarts countdown
+
+  //Generating result message for either pass or fail
+  const [resultMessage, setResultMessage] = useState<string>("");
+
+  const playedNoteNames = activeNotes.map(n => notes[n % 12]);
+  const uniquePlayed = [...new Set(playedNoteNames)].sort();
+  
+  const [checking, setChecking] = useState(false);
+
+  useEffect(() => {
+    if (!chord || checking) return; // skip if already showing message
+    if (!chord) return;
+
+    const expected = [...chord.notes].sort();
+    const isMatch =
+      expected.length === uniquePlayed.length &&
+      expected.every((n, i) => n === uniquePlayed[i]);
+
+    if (!isMatch) return;
+
+    setChecking(true);
+    setResultMessage("Correct - You smashed it!");
+    
+    const timer = setTimeout(() => {
+      setResultMessage("");
+      generateChord();
+      setChecking(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [playedNoteNames, chord]);
 
   // Create a new random chord
   function generateChord() {
@@ -114,6 +196,12 @@ function App() {
         <p className='chordName'>
           {chord ? chord.name : "Press Start"}
         </p>
+
+        <p>Notes you are playing: {uniquePlayed}</p>
+
+        <h2>{resultMessage}</h2>
+
+        <h1></h1>
 
         <h3>Time left: {countdownNumber}</h3>
 
