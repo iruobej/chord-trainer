@@ -29,7 +29,7 @@ function App() {
     }
     
     function onMIDIMessage(message: MIDIMessageEvent) {
-      const [status, note, velocity] = message.data;
+      const [status, note, velocity] = message.data!; //! means it is definitely not null
 
       if (status >=240) return; //stops console from logging messages like 254 (sent regularly by keyboard to let browser know its still connected)
 
@@ -159,7 +159,7 @@ function App() {
   const [checking, setChecking] = useState(false);
 
   useEffect(() => {
-    if (!chord || resultMessage) return; // skip if no chord or not running
+    if (!chord || resultMessage) return; // skip if a resultMessage already has a value and is thus being displayed on screen
 
     const expected = [...chord.notes].sort();
     const isMatch =
