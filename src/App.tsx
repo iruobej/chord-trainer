@@ -4,6 +4,7 @@ import Navbar from './components/Navbar.tsx';
 
 function App() {
   const [activeNotes, setActiveNotes] = useState<number[]>([]);
+  const [midiMessage, setMIDIMessage] = useState<string>("");
   //all 12 notes of scale
   const notes = ["C", "C#", "D", "E♭", "E", "F", "F#", "G", "A♭", "A", "B♭", "B"];
   useEffect(() => {
@@ -16,25 +17,40 @@ function App() {
     // 'midi' displays a MIDIAccess object, the key to recieving midi data
     // The object itself provides an interface to any MIDI devices attached
     function success (midi: MIDIAccess) {
+      const updateStatus = () => {
+        if (midi.inputs.size < 1) {
+          setMIDIMessage("No MIDI device connected");
+        } else {
+          setMIDIMessage("MIDI Device Connected");
+        }
+      }
+
+      //Scan for devices immediately
+      updateStatus();
+
+      //Also scan and update status whenever a new device is connected
+      midi.onstatechange = () => {
+        updateStatus();
+      }
+
       var inputs = midi.inputs.values();
+
       // inputs is an Iterator 
       for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
           // each time there is a midi message call the onMIDIMessage function 
           input.value.onmidimessage = onMIDIMessage;
       }
+      console.log('MIDI connected');
     }
 
     function failure () {
-        console.error('No access to your midi devices.')
+        console.log('No access to your midi devices.');
     }
     
     function onMIDIMessage(message: MIDIMessageEvent) {
       const [status, note, velocity] = message.data!; //! means it is definitely not null
 
       if (status >=240) return; //stops console from logging messages like 254 (sent regularly by keyboard to let browser know its still connected)
-
-      //Converting note value to lettered name
-      const currentNoteName = notes[note % 12];
 
       // Example: Detect note on (status 144) and note off (status 128)
       // Note ON
@@ -43,13 +59,11 @@ function App() {
               if (prev.includes(note)) return prev; // avoid duplicates
               return [...prev, note];
           });
-        console.log(`Note ON: ${currentNoteName} (velocity: ${velocity})`);
       }
 
       // Note OFF
       if (status === 128 || (status === 144 && velocity === 0)) {
           setActiveNotes(prev => prev.filter(n => n !== note));
-          console.log(`Note OFF: ${currentNoteName}`);
       }
     }
   }, []);
@@ -237,6 +251,7 @@ function App() {
         }}>
           {running? "Stop" : "Start"}
         </button>
+        <p>{midiMessage}</p>
       </div>
     </>
   )
