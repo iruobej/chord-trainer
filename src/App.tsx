@@ -155,9 +155,6 @@ function App() {
   const playedNoteNames = activeNotes.map(n => notes[n % 12]);
   const uniquePlayed = [...new Set(playedNoteNames)].sort();
   
-  //A lock. False means keep checking notes, True means stop checking once result is decided
-  const [checking, setChecking] = useState(false);
-
   useEffect(() => {
     if (!chord || resultMessage) return; // skip if a resultMessage already has a value and is thus being displayed on screen
 
@@ -168,14 +165,11 @@ function App() {
 
     if (isMatch) {
       setResultMessage("Correct - You smashed it!");
-      setChecking(true);
+
       return;
     } else if (!isMatch && countdownNumber === 1){
       setResultMessage("Incorrect.");
-      setChecking(true);
     }
-
-    setChecking(true);
   }, [playedNoteNames, chord]);
 
   // Create a new random chord
@@ -185,7 +179,6 @@ function App() {
     setRunning(true);
 
     setResultMessage("");
-    setChecking(false);
   }
   return (
     <>
