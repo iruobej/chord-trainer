@@ -5,7 +5,7 @@ import Navbar from './components/Navbar.tsx';
 function App() {
   const [activeNotes, setActiveNotes] = useState<number[]>([]);
   const [midiMessage, setMIDIMessage] = useState<string>("");
-  //const [connected, setConnected] = useState<boolean>(false);
+  const [connected, setConnected] = useState<boolean>(false);
   //all 12 notes of scale
   const notes = ["C", "C#", "D", "E♭", "E", "F", "F#", "G", "A♭", "A", "B♭", "B"];
   useEffect(() => {
@@ -21,10 +21,10 @@ function App() {
       const updateStatus = () => {
         if (midi.inputs.size < 1) {
           setMIDIMessage("No MIDI device connected");
-          //setConnected(false);
+          setConnected(false);
         } else {
           setMIDIMessage("MIDI Device Connected");
-          //setConnected(true);
+          setConnected(true);
         }
       }
 
@@ -181,7 +181,7 @@ function App() {
       expected.every((n, i) => n === uniquePlayed[i]);
 
     if (isMatch) {
-      setResultMessage("Correct - You smashed it!");
+      setResultMessage("Correct!");
 
       return;
     } else if (!isMatch && countdownNumber === 1){
@@ -208,10 +208,10 @@ function App() {
           {chord ? chord.name : "Press Start"}
         </p>
 
-        <p>Notes you are playing: [ {uniquePlayed} ]</p>
+        {connected && <p>Notes you are playing: [ {uniquePlayed} ]</p>}
 
 
-        <h2>{/*connected &&*/}{resultMessage}</h2>
+        {connected && <h2>{resultMessage}</h2>}
 
         <h1></h1>
 
