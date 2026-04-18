@@ -5,6 +5,7 @@ import Navbar from './components/Navbar.tsx';
 function App() {
   const [activeNotes, setActiveNotes] = useState<number[]>([]);
   const [midiMessage, setMIDIMessage] = useState<string>("");
+  //const [connected, setConnected] = useState<boolean>(false);
   //all 12 notes of scale
   const notes = ["C", "C#", "D", "E♭", "E", "F", "F#", "G", "A♭", "A", "B♭", "B"];
   useEffect(() => {
@@ -20,8 +21,10 @@ function App() {
       const updateStatus = () => {
         if (midi.inputs.size < 1) {
           setMIDIMessage("No MIDI device connected");
+          //setConnected(false);
         } else {
           setMIDIMessage("MIDI Device Connected");
+          //setConnected(true);
         }
       }
 
@@ -207,7 +210,8 @@ function App() {
 
         <p>Notes you are playing: [ {uniquePlayed} ]</p>
 
-        <h2>{resultMessage}</h2>
+
+        <h2>{/*connected &&*/}{resultMessage}</h2>
 
         <h1></h1>
 
@@ -251,7 +255,7 @@ function App() {
         }}>
           {running? "Stop" : "Start"}
         </button>
-        <p>{midiMessage}</p>
+        <p><i className="fa-solid fa-circle-info"></i> {midiMessage}</p>
       </div>
     </>
   )
