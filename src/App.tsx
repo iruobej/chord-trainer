@@ -137,7 +137,7 @@ function App() {
   // Store the current chord
   const [chord, setChord] = useState<Chord | null>(null);
 
-   //Controlling when the program should stop generating a new chord;
+  //Controls the countdown timer
   const [running, setRunning] = useState(false);
 
 
@@ -154,7 +154,7 @@ function App() {
 
     const interval = setInterval(() => {
       setCountdownNumber(prev => {
-        if (prev <= 1) {
+        if (prev <= 0) {
           generateChord();
           return Number(selectedNumber);
         }
@@ -182,9 +182,13 @@ function App() {
 
     if (isMatch) {
       setResultMessage("Correct!");
+      //Pause timer
+      setRunning(false);
+      //Wait 3 seconds before generating new chord
+      const myTimeout = setTimeout(generateChord, 3000);
 
       return;
-    } else if (!isMatch && countdownNumber === 1){
+    } else if (!isMatch && countdownNumber === 0){
       setResultMessage("Incorrect.");
     }
   }, [playedNoteNames, chord]);
