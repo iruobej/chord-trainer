@@ -185,7 +185,7 @@ function App() {
       //Pause timer
       setRunning(false);
       //Wait 3 seconds before generating new chord
-      const myTimeout = setTimeout(generateChord, 3000);
+      setTimeout(generateChord, 3000);
 
       return;
     } else if (!isMatch && countdownNumber === 0){
