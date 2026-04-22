@@ -25,3 +25,20 @@ nav {
   font-size: xxx-large;
   font-weight: 600;
 }
+
+button {
+  padding: 12px 15px;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: large;
+}
+
+.startButton {
+  background-color: rgb(26, 167, 26);
+}
+
+.finishButton {
+  background-color: red;
+}

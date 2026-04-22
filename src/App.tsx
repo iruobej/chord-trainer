@@ -81,7 +81,8 @@ function App() {
     | "aug7"
     | "7"
     | "dim7"
-    | "halfdim7";
+    | "halfdim7"
+    | "minMaj7";
 
   type Chord = {
     name: string;
@@ -98,7 +99,8 @@ function App() {
     aug7: [0, 4, 8, 10], 
     "7": [0, 4, 7, 10], 
     dim7: [0, 3, 6, 9], 
-    halfdim7: [0, 3, 6, 10]
+    halfdim7: [0, 3, 6, 10],
+    minMaj7: [0, 3, 7, 11]
   };
 
   //Build a chord from a root note (from notes array) and type (from chordTypes)
@@ -221,43 +223,27 @@ function App() {
 
         <h3>Time left: {countdownNumber}</h3>
 
-        <h2>Set time</h2>
+        <h2>Set time:</h2>
         <select 
           value={selectedNumber}
           onChange={(e) => setSelectedNumber(e.target.value)}
         >
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="11">11</option>
-          <option value="12">12</option>
-          <option value="13">13</option>
-          <option value="14">14</option>
-          <option value="15">15</option>
-          <option value="16">16</option>
-          <option value="17">17</option>
-          <option value="18">18</option>
-          <option value="19">19</option>
-          <option value="20">20</option>
+          {[...Array(60).keys()].map(i => (
+            <option key={i + 1} value={(i + 1).toString()}>{i + 1}</option>
+          ))}
         </select>
 
         <p>Selected time: {selectedNumber} seconds</p>
         {/* Button to get a new chord */}
-        <button onClick={() => {
+        <button className={running ? "finishButton" : "startButton"} onClick={() => {
           if (running) {
             setRunning(false);
           } else {
             generateChord();
           }
         }}>
-          {running? "Stop" : "Start"}
+
+          {running? "Finish" : "Start"}
         </button>
         <p><i className="fa-solid fa-circle-info"></i> {midiMessage}</p>
       </div>
