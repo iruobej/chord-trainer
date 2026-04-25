@@ -103,6 +103,8 @@ function App() {
     minMaj7: [0, 3, 7, 11]
   };
 
+  
+
   //Build a chord from a root note (from notes array) and type (from chordTypes)
   function getChord(root: string, type: ChordType) : string[] {
     // Find the index of the root note
@@ -125,7 +127,7 @@ function App() {
 
     // Randomly pick a chord type
     function getRandomChordType(): ChordType{
-      const types = Object.keys(chordTypes) as ChordType[];
+      const types = Array.from(selectedChords);
       return types[Math.floor(Math.random() * types.length)]; //e.g. types[Math.floor(0.34 * 10)] = types[3] = aug
     }
 
@@ -146,6 +148,23 @@ function App() {
   //timer value after which a new chord is generated
   const [selectedNumber, setSelectedNumber] = useState("5");
   const [countdownNumber, setCountdownNumber] = useState(Number(selectedNumber)); // to show time left
+
+  const [selectedChords, setSelectedChords] = useState<Set<ChordType>>(
+    new Set(Object.keys(chordTypes) as ChordType[])
+  )
+
+  // Modifying chords selected when user selects/deselects a chord
+  function toggleChord(chord: ChordType) {
+    setSelectedChords(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(chord)) {
+          newSet.delete(chord);
+        } else {
+          newSet.add(chord);
+        }
+      return newSet;
+    });
+  }
 
   //Handling countdown
   useEffect(() => {
@@ -211,7 +230,7 @@ function App() {
 
         {/* Show chord name */}
         <p className='chordName'>
-          {chord ? chord.name : "Press Start"}
+          {Array.from(selectedChords).length <= 0 ? "No Chord Types Selected" : chord ? chord.name : "Press Start"}
         </p>
 
         {connected && <p>Notes you are playing: [ {uniquePlayed} ]</p>}
@@ -246,6 +265,20 @@ function App() {
           {running? "Finish" : "Start"}
         </button>
         <p><i className="fa-solid fa-circle-info"></i> {midiMessage}</p>
+
+        {/*Checkbox list - allows users to choose what chords they want to be tested on */}
+        {(Object.keys(chordTypes) as ChordType[]).map(c => (
+          <>
+            <input type="checkbox" 
+              name={c} 
+              value={c} 
+              id={c} 
+              checked={selectedChords.has(c)} 
+              onChange={() => toggleChord(c)}
+            />
+            <label htmlFor={c}>{c}</label>
+          </>
+        ))}
       </div>
     </>
   )
